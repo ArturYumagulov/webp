@@ -10,7 +10,9 @@ def excel_reader(file_obj: str, sheet_name: str) -> list:
     sheet = wb[sheet_name]
     for i in sheet:
         for ii in i:
-            result.append(ii.value)
+            new_str = ii.value
+            low_str = new_str.replace("//", '/')
+            result.append(low_str[21:])
     return result
 
 
