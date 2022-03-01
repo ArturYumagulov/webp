@@ -3,6 +3,7 @@ import os
 
 from settings import *
 from ready.reader import excel_reader
+path = "C:\\Users\\YumagulovA\\Pictures"
 
 
 class ImageConv:
@@ -33,12 +34,51 @@ def conv_to_webp(path, name):
     im.save(f"read/{clear_name[:-3]}webp", "webp")
 
 
+def path_remove(path):
+    result = []
+    for path, dirs, files in os.walk(path):
+        for file in files:
+            if file[-3:] == "jpg":
+                # print(f"{path}\\{file}")
+                # result.append(f"{path}\\{file}")
+                result.append([path, file])
+
+            elif file[-3:] == 'png':
+                # print(f"{path}\\{file}")
+                # result.append(f"{path}\\{file}")
+                result.append([path, file])
+
+            elif file[-3:] == 'svg':
+                # print(f"{path}\\{file}")
+                # result.append(f"{path}\\{file}")
+                result.append([path, file])
+
+            elif file[-3:] == 'JPG':
+                # print(f"{path}\\{file}")
+                # result.append(f"{path}\\{file}")
+                result.append([path, file])
+
+            elif file[-4:] == 'jpeg':
+                # print(f"{path}\\{file}")
+                # result.append(f"{path}\\{file}")
+                result.append([path, file])
+
+    return result
+
+
 if __name__ == '__main__':
-    for i in excel_reader(IMAGE_PATH, SHEET_NAME):
-        try:
-            conv_to_webp(f'/Users/arturumagulov/Yandex.Disk.localized/Загрузки/wwwroot{i}', i)
-            print("save")
-        except FileNotFoundError:
-            print("Not Found")
+    # for i in excel_reader(IMAGE_PATH, SHEET_NAME):
+    data = path_remove(path)
+    for i in data:
+        print(i[0] + i[1])
+        conv_to_webp(i[0], i[1])
+        break
+    #     try:
+    #         conv_to_webp(f'/Users/arturumagulov/Yandex.Disk.localized/Загрузки/wwwroot{i}', i)
+    #         print("save")
+    #     except FileNotFoundError:
+    #         print("Not Found")
+    # print(path_remove(path))
+
 
 
