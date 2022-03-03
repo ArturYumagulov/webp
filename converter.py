@@ -1,37 +1,39 @@
-from PIL import Image
+import openpyxl
+from PIL import Image, UnidentifiedImageError
 import os
 
-from settings import *
-from ready.reader import excel_reader
-path = "C:\\Users\\YumagulovA\\Pictures"
+path = "/Users/arturumagulov/Documents/Suvar/site/wwwroot"
 
 
-class ImageConv:
+def write_xls(lst, to_path):
+    """ write_xls(result, "result.xlsx") """
 
-    def __init__(self, path):
-        self.path = path
-
-    def walker(self):
-        for i in os.walk(self.path):
-            print(i)
-            return i[2]
-
-    def conv_to_webp(self, lst):
-        for name in lst:
-            im = Image.open(f"{self.path}/{name}").convert("RGB")
-            im.save(f"ready\\{name[:-3]}webp", "webp")
-
-    def conv_to_ico(self, lst):
-        for name in lst:
-            im = Image.open(f"{self.path}\\{name}").convert("RGB")
-            im.save(f"ready\\{name[:-3]}ico", "ico")
+    wb = openpyxl.Workbook()
+    wb.create_sheet(title="Лист", index=0)
+    sheet = wb["Лист"]
+    for i in range(len(lst)):
+        for j in lst[i]:
+            value = str(j)
+            cell = sheet.cell(row=i + 1, column=(lst[i].index(j)) + 1)
+            cell.value = value
+    wb.save(to_path)
 
 
 def conv_to_webp(path, name):
-    clear_name = name.replace('/', '_')
-    # print(clear_name)
-    im = Image.open(path).convert("RGB")
-    im.save(f"read/{clear_name[:-3]}webp", "webp")
+
+    sub_result = list()
+
+    clear_path = f"{path}/{name}"
+    sub_result.append(clear_path[42:])
+    sub_result.append(round(os.stat(clear_path).st_size / (1024 * 1024), 2))
+    im = Image.open(clear_path).convert("RGB")
+    sub_result.append("конвертированно")
+    im.save(f"{clear_path[:-3]}webp", "webp")
+    sub_result.append(f"{clear_path[42:-3]}webp")
+    sub_result.append(round(os.stat(f"{clear_path[:-3]}webp").st_size / (1024 * 1024), 2))
+    os.remove(clear_path)
+
+    return sub_result
 
 
 def path_remove(path):
@@ -39,46 +41,39 @@ def path_remove(path):
     for path, dirs, files in os.walk(path):
         for file in files:
             if file[-3:] == "jpg":
-                # print(f"{path}\\{file}")
-                # result.append(f"{path}\\{file}")
                 result.append([path, file])
 
             elif file[-3:] == 'png':
-                # print(f"{path}\\{file}")
-                # result.append(f"{path}\\{file}")
-                result.append([path, file])
-
-            elif file[-3:] == 'svg':
-                # print(f"{path}\\{file}")
-                # result.append(f"{path}\\{file}")
                 result.append([path, file])
 
             elif file[-3:] == 'JPG':
-                # print(f"{path}\\{file}")
-                # result.append(f"{path}\\{file}")
                 result.append([path, file])
 
-            elif file[-4:] == 'jpeg':
-                # print(f"{path}\\{file}")
-                # result.append(f"{path}\\{file}")
-                result.append([path, file])
+            # elif file[-4:] == 'jpeg':
+            #     result.append([path, file])
 
     return result
 
 
 if __name__ == '__main__':
-    # for i in excel_reader(IMAGE_PATH, SHEET_NAME):
     data = path_remove(path)
+    logs = list()
+    error_logs = list()
     for i in data:
-        print(i[0] + i[1])
-        conv_to_webp(i[0], i[1])
-        break
-    #     try:
-    #         conv_to_webp(f'/Users/arturumagulov/Yandex.Disk.localized/Загрузки/wwwroot{i}', i)
-    #         print("save")
-    #     except FileNotFoundError:
-    #         print("Not Found")
-    # print(path_remove(path))
+        clear_path = f"{i[0]}/{i[1]}"
+        try:
+            logs.append(conv_to_webp(i[0], i[1]))
+            print("logs", logs)
 
-
+        except UnidentifiedImageError:
+            print(f"{clear_path[42:]} ошибка")
+            error_logs.append([clear_path[42:], "ошибка"])
+        except FileNotFoundError:
+            print(f"{clear_path[42:]} файл не найден")
+            error_logs.append([clear_path[42:], "файл не найден"])
+        except ValueError:
+            print(f"{clear_path[42:]} большой размер данных")
+            error_logs.append([clear_path[42:], "большой размер данных"])
+    write_xls(logs, "logs.xlsx")
+    write_xls(error_logs, "errors.xlsx")
 
